@@ -1,8 +1,11 @@
+require 'pry'
+
 class Player
-  attr_accessor :move, :name
+  attr_accessor :move, :name, :score
 
   def initialize
     set_name
+    @score = []
   end
 end
 
@@ -87,6 +90,7 @@ class RPSGame
 
   def display_welcome_message
     puts "Welcome to Rock, Paper, Scissors!"
+    puts "The first player to 3 wins the game!"
   end
 
   def display_goodbye_message
@@ -94,17 +98,43 @@ class RPSGame
   end
 
   def display_moves
+    puts "-----"
     puts "#{human.name} chose #{human.move}."
     puts "#{computer.name} chose #{computer.move}."
   end
 
-  def display_winner
+  def display_turn_winner
     if human.move > computer.move
-      puts "#{human.name} won!"
+      puts "#{human.name} won this turn!"
     elsif human.move < computer.move
-      puts "#{computer.name} won!"
+      puts "#{computer.name} won this turn!"
     else
       puts "It's a tie!"
+    end
+  end
+
+  def track_score(human_score, computer_score)
+    if human.move > computer.move
+      human_score.push('1')
+    elsif human.move < computer.move
+      computer_score.push('1')
+    end
+  end
+
+  def display_score
+    puts "#{human.name}'s score is #{human.score.size}."
+    puts "#{computer.name}'s score is #{computer.score.size}."
+  end
+
+  def game_winner?(human_score, computer_score)
+    human_score.size == 3 || computer_score.size == 3
+  end
+
+  def display_game_winner(human_score, computer_score)
+    if human_score.size == 3
+      puts "#{human.name} won the game!"
+    elsif computer_score.size == 3
+      puts "#{computer.name} won the game!"
     end
   end
 
@@ -121,17 +151,23 @@ class RPSGame
     return true if answer == 'y'
   end
 
-  def play
+  def game_play
     display_welcome_message
     loop do
-      human.choose
-      computer.choose
-      display_moves
-      display_winner
-      break unless play_again?
+      loop do
+        human.choose
+        computer.choose
+        display_moves
+        track_score(human.score, computer.score)
+        display_turn_winner
+        display_score
+        break if game_winner?(human.score, computer.score)
+      end
+      display_game_winner(human.score, computer.score)
+      # break unless play_again?
     end
     display_goodbye_message
   end
 end
 
-RPSGame.new.play
+RPSGame.new.game_play
