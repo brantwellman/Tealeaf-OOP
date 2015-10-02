@@ -6,6 +6,11 @@ class Player
   def initialize
     set_name
     @score = []
+    @move_history = []
+  end
+
+  def collect_move(move)
+    @move_history << move
   end
 end
 
@@ -86,6 +91,8 @@ class RPSGame
   def initialize
     @human = Human.new
     @computer = Computer.new
+    @human_moves = []
+    @computer_moves = []
   end
 
   def display_welcome_message
@@ -151,20 +158,33 @@ class RPSGame
     return true if answer == 'y'
   end
 
+  def collect_moves
+    @human_moves << human.move
+    @computer_moves << computer.move
+  end
+
+  def display_move_history
+    puts "Your moves have been: #{@human_moves.join(", ")}."
+    puts "#{computer.name}'s moves have been: #{@computer_moves.join(", ")}."
+    puts "-----"
+  end
+
   def game_play
     display_welcome_message
     loop do
       loop do
         human.choose
         computer.choose
+        collect_moves
         display_moves
         track_score(human.score, computer.score)
         display_turn_winner
         display_score
+        display_move_history
         break if game_winner?(human.score, computer.score)
       end
       display_game_winner(human.score, computer.score)
-      # break unless play_again?
+      break unless play_again?
     end
     display_goodbye_message
   end
